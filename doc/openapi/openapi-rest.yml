@@ -1,0 +1,260 @@
+openapi: 3.0.2
+info:
+  title: spacecraft
+  description: This is a microservice intended to provide operations for spacecraft api
+  termsOfService: http://swagger.io/terms/
+  version: 0.0.1
+servers:
+  - url: "http://localhost:8080/{basePath}"
+    variables:
+      basePath:
+        default: api/v1
+tags:
+  - name: Spacecrafts
+    description: Spacecrafts
+paths:
+  "/spacecrafts":
+    post:
+      tags:
+        - Spacecrafts
+      operationId: createSpacecraft
+      summary: Create spacecraft
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpacecraftRQDTO"
+      responses:
+        "201":
+          description: Spacecraft created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpacecraftRSDTO'
+        
+        "500":
+          description: "Unexpected internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+    get:
+      tags:
+        - Spacecrafts
+      operationId: findSpacecrafts
+      summary: Find spacecrafts (paginated) with selected name, size and page
+      parameters:
+        - in: query
+          name: id
+          description: "Spacecraft name"
+          required: false
+          schema:
+            type: string
+            example: "My custom name for query"
+        - in: query
+          name: page
+          description: "Page select (0 is first page and value by default)"
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - in: query
+          name: size
+          description: "Page size (3 by default)"
+          required: false
+          schema:
+            type: integer
+            example: 3
+      responses:
+        "200":
+          description: Spacecrafts paginated with criteria found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpacecraftPageableRSDTO'
+        "500":
+          description: "Unexpected internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+  "/spacecrafts/{id}":
+    get:
+      tags:
+        - Spacecrafts
+      operationId: findSpacecraft
+      summary: Find spacecraft with selected identifier
+      parameters:
+        - in: path
+          name: id
+          description: "Spacecraft identifier"
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Spacecraft found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpacecraftRSDTO'
+        "404":
+          description: "Spacecraft not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+        "500":
+          description: "Unexpected internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+    patch:
+      tags:
+        - Spacecrafts
+      operationId: updateSpacecraft
+      summary: Update spacecraft with selected information (name, series or films)
+      parameters:
+        - in: path
+          name: id
+          description: "Spacecraft identifier"
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpacecraftRQDTO"
+      responses:
+        "200":
+          description: Spacecraft updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpacecraftRSDTO'
+        "404":
+          description: "Spacecraft not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+
+        "500":
+          description: "Unexpected internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+    delete:
+      tags:
+        - Spacecrafts
+      operationId: deleteSpacecraft
+      summary: Delete spacecraft with selected identifier
+      parameters:
+        - in: path
+          name: id
+          description: "Spacecraft identifier"
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Spacecraft updated
+        "404":
+          description: "Spacecraft not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+        "500":
+          description: "Unexpected internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInfoRSDTO"
+
+
+components:
+  schemas:
+    SpacecraftRQDTO:
+      allOf:
+        - type: object
+        - description: Spacecraft request object.
+        - $ref: '#/components/schemas/SpacecraftRDTO'
+
+    SpacecraftRSDTO:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              description: identifier from spacecraft
+              example: 1
+        - description: Spacecraft response object.
+        - $ref: '#/components/schemas/SpacecraftRDTO'
+    
+    SpacecraftRDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Spacecraft name
+          example: "Spacecraft name custom"
+        series:
+          type: string
+          description: Series
+          example: "Describes in which series appears"
+        films:
+          type: string
+          description: Films
+          example: "Describes in which films appears"
+    
+    SpacecraftPageableRSDTO:
+      properties:
+        totalItems:
+          type: integer
+          description: Total items for selected query
+          example: 10
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpacecraftRSDTO"
+        totalPages:
+          type: integer
+          description: Total page for selected query
+          example: 2
+        currentPage:
+          type: integer
+          description: Current page for current query
+          example: 1
+    
+    ErrorInfoRSDTO:
+      type: object
+      description: Error info response.
+      properties:
+        timestamp:
+          type: string
+          format: timestamp
+          description: Timestamp from error.
+          example: '2021-01-01T00:00:00.000'
+        error:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/ErrorDetailRSDTO"
+    ErrorDetailRSDTO:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          type: string
+          description: Error code.
+          example: '1'
+        message:
+          type: string
+          description: Description from error.
+          example: 'This is a description from error detailed.'

@@ -1,0 +1,23 @@
+# Maven
+target/
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# IntelliJ
+.idea
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.classpath
+.factorypath
+.project
+.settings/
+
+# macOS
+.DS_Store
+
+# Other
+*.jar
+.metadata
